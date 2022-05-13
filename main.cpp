@@ -1,20 +1,10 @@
 /*=============================================
 Requirements:
-1. Function that creates a list of random numbers
-2. function that tests the speed of std::sort
+1. [DONE]Function that creates a list of random numbers
+2. [DONE] function that tests the speed of std::sort
 3. function that tests the speed of our own sorting algorithm
 4. CLass of our sorting algorithm, takes in a vector of random numbers.
-5. Program takes input of the amount of numbers.
-
-
-
-
-
-
-
-
-
-
+5. [DONE]Program takes input of the amount of numbers.
 
 ==============================================*/
 
@@ -24,7 +14,6 @@ Requirements:
 #include <vector>
 #include "time.h"
 #include <algorithm>
-#include <time.h>
 #include <stdlib.h>
 #include <cstring>
 
@@ -71,6 +60,15 @@ int main(int argc, const char* argv[]){
 	std::cout << "Program Starting... input = " << inputamount << std::endl << std::endl;
 	myList = createRandomNumbers(inputamount);
 
+	std::vector<int> * myListCopy = new std::vector<int>;
+
+	myListCopy->reserve(myList->size());
+	myListCopy->insert(myListCopy->end(),myList->begin(),myList->end());
+
+	//[DEBUG]std::cout << std::endl << "Size of copy: " << myListCopy->size() << std::endl;
+
+
+
 	if(print){
 		// Printing initially created list.
 		std::cout << "Initial list: ";
@@ -89,9 +87,30 @@ int main(int argc, const char* argv[]){
 			std::cout << myList->at(i) << " ";
 		}
 	}
+
+	// Running my Quicksort
+	time_t start, end;
+	start = clock();
+	std::cout << "\nWe are starting my Quicksort...";
+	 myListCopy = parallelSort(myListCopy);
+	std::cout << "\nWe are ending my Quicksort...";
+	end = clock();
+
+	double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+	std::cout << std::endl << "std::sort total time: " << cpu_time_used << std::endl << std::endl;
+
+	if(print){
+		std::cout << std::endl << "Sorted list (Custom QuickSort): ";
+		for(auto i = 0; i < myListCopy->size(); ++i){
+			std::cout << myListCopy->at(i) << " ";
+		}
+	}
+
 	
 
 	delete myList;
+	delete myListCopy;
 
 	return 0;
 }
@@ -107,7 +126,7 @@ std::vector<int>* createRandomNumbers(int amount){
 
 	for (auto i = 0; i < amount; ++i)
 	{
-		int x = std::abs(rand() % 100000);
+		int x = std::abs(rand() % 100);
 		list->push_back(x);
 	}
 
