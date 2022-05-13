@@ -98,7 +98,7 @@ int main(int argc, const char* argv[]){
 
 	double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-	std::cout << std::endl << "std::sort total time: " << cpu_time_used << std::endl << std::endl;
+	std::cout << std::endl << "Parallel Quicksort total time: " << cpu_time_used << std::endl << std::endl;
 
 	if(print){
 		std::cout << std::endl << "Sorted list (Custom QuickSort): ";
