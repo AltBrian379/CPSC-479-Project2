@@ -17,7 +17,7 @@ std::vector<int>* recursiveParallelSort(std::vector<int>* list)
     
     int i = 0, tid; // I for iterator and tid (probably) for thread number
     
-
+    if(list->size() == 0) { std::cout << "\nUh how...\n"; }
     if (list->size() == 1){ 
         //[DEBUG] std::cout << "\n Size 1 conditional met\n";
          return list; } // If the size of the list is 1 return it.
@@ -30,7 +30,7 @@ std::vector<int>* recursiveParallelSort(std::vector<int>* list)
     srand( time(NULL) ); // Seed creation
     int pivot;
     pivot = (rand() % (list->size() - 1 )); // Random number generator, with limit to the size 
-    //[DEBUG]std::cout << "Pivot is equal to element " << pivot << " , which holds value " << list->at(pivot) << std::endl;
+    // std::cout << std::endl << std::endl << "Pivot is equal to element " << pivot << " , which holds value " << list->at(pivot);
 
     
 
@@ -43,29 +43,47 @@ std::vector<int>* recursiveParallelSort(std::vector<int>* list)
     leftList->reserve(list->size());
     rightList->reserve(list->size());
     //std::cout << "\nBegin PragmaOMP";
-    #pragma omp parallel num_threads(8) private(i, tid) shared(list,pivot, leftList, rightList) // Tell the compiler we are using 8 threads. private variables are i and tid while shared are list and pivot
+    #pragma omp parallel num_threads(16) private(i, tid) shared(list,pivot, leftList, rightList) // Tell the compiler we are using 8 threads. private variables are i and tid while shared are list and pivot
     {
-        #pragma omp for // Parallelize the for loop
+        std::vector<int>* privateLeftList = new std::vector<int>;
+        std::vector<int>* privateRightList = new std::vector<int>;
+        privateLeftList->reserve(list->size());
+        privateRightList->reserve(list->size());
+        #pragma omp for nowait // Parallelize the for loop
         for (i = 0; i < list->size(); ++i) // for every element in list.
         {
+            
             tid = omp_get_thread_num();
             //std::cout << "\nPragmaOMP began... Working....";
             //[DEBUG] std::cout << std::endl << "I am thread #" << tid << " and I am analyzing element " << i << " with value " << list->at(i) << std::endl;
+            
             if (list->at(i) <= list->at(pivot)){      // if the number at an element is less than or equal to the pivot, including the pivot 
-                leftList->push_back(list->at(i));     // add to the left list
+                //printf("\nI am thread %i, analyzing element %i pushing back value %i to leftlist becuase %i <= %i",tid,i,list->at(i),list->at(i), list->at(pivot));
+                privateLeftList->push_back(list->at(i));
+                // add to the left list
+                
             }else if(list->at(i) > list->at(pivot)){ // else if the number at an element is greater than the value of the pivot, add it to the right list
-                rightList->push_back(list->at(i));
+                //printf("\nI am thread %i, analyzing element %i pushing back value %i to rightlist becuase %i > %i",tid,i,list->at(i),list->at(i), list->at(pivot));
+                privateRightList->push_back(list->at(i));
             }
         }
 
- 
         #pragma omp critical
         {
-            if(tid ==0)
-            {
-               // std::cout << "\nCritical Called, Returning to main thread.\n";
-            }
+            //std::cout << "\nHITTING CRITICAL thread " << tid;
+            
+                leftList->insert(leftList->end(), privateLeftList->begin(),privateLeftList->end());
+            
+           
+                rightList->insert(rightList->end(), privateRightList->begin(), privateRightList->end());
+            
+            //std::cout << "\nCRITICAL DONE" << tid;
         }
+
+
+        delete privateLeftList;
+        delete privateRightList;
+
 
 
 
@@ -77,21 +95,26 @@ std::vector<int>* recursiveParallelSort(std::vector<int>* list)
     
     
     
-    // [DEBUG] std::cout << std::endl << "Printing Left List ";
+    //std::cout << std::endl << "Printing Left List of size " << leftList->size() << ":";
 	//for(auto i = 0; i < leftList->size(); ++i){
 	//	std::cout << leftList->at(i) << " ";
 	//}
-    // std::cout << std::endl << "Printing Right List ";
+     //std::cout << std::endl << "Printing Right List of size " << rightList->size() << ":";
 	//for(auto i = 0; i < rightList->size(); ++i){
 	//	std::cout << rightList->at(i) << " ";
 	//}
-   // [DEBUG]getc(stdin);
+    //getc(stdin);
 
-    //[DEBUG]std::cout << "We are now entering the left list of size: " << leftList->size() << std::endl;
+    //std::cout << "We are now entering the left list of size: " << leftList->size() << std::endl;
+
+    if(leftList->size() == 0)
+    {
+        return rightList;
+    }
     leftList = recursiveParallelSort(leftList); // recursively go through the left list
 
    // getc(stdin);
-    //[DEBUG] std::cout << "We are now entering the right list of size: " << rightList->size() << std::endl;
+    //std::cout << "We are now entering the right list of size: " << rightList->size() << std::endl;
     if (rightList->size()== 0)
     { 
         return leftList;
@@ -102,7 +125,7 @@ std::vector<int>* recursiveParallelSort(std::vector<int>* list)
 
     std::vector<int>* newList = new std::vector<int>; // declare new list pointer
 
-    newList->reserve(leftList->size()+ rightList->size()); // allocate memory for the number of elements
+    newList->reserve((leftList->size()+ rightList->size()) + 1); // allocate memory for the number of elements
     newList->insert(newList->end(), leftList->begin(), leftList->end()); // append the left side (less) first
     newList->insert(newList->end(), rightList->begin(), rightList->end()); // append the right side (greater) to the left side
      //[DEBUG]std::cout << std::endl << "Printing NewList List ";

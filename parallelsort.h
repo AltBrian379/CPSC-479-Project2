@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <iostream>
+#include <stdio.h>
 
 std::vector<int>* parallelSort(std::vector<int>*);
 

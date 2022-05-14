@@ -82,7 +82,8 @@ int main(int argc, const char* argv[]){
 
 	if(print){
 		// Printed using STD Sort
-		std::cout << std::endl << "Sorted list (std::sort()): ";
+
+		std::cout << std::endl << "Sorted list of size " << myList->size() << " (std::sort()): ";
 		for(auto i = 0; i < inputamount; ++i){
 			std::cout << myList->at(i) << " ";
 		}
@@ -90,18 +91,26 @@ int main(int argc, const char* argv[]){
 
 	// Running my Quicksort
 	time_t start, end;
+	
+
+	if(print){
+		std::cout << "\nWe are starting my Quicksort...";
+	}
 	start = clock();
-	std::cout << "\nWe are starting my Quicksort...";
-	 myListCopy = parallelSort(myListCopy);
-	std::cout << "\nWe are ending my Quicksort...";
+	myListCopy = parallelSort(myListCopy);
 	end = clock();
+	if(print)
+	{
+		std::cout << "\nWe are ending my Quicksort...";
+	}
+	
 
 	double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-	std::cout << std::endl << "Parallel Quicksort total time: " << cpu_time_used << std::endl << std::endl;
+	std::cout << std::endl << "Sorting using Parallel Quicksort\nParallel Quicksort total time: " << cpu_time_used << std::endl << std::endl;
 
 	if(print){
-		std::cout << std::endl << "Sorted list (Custom QuickSort): ";
+		std::cout << std::endl << "Sorted list of size " << myListCopy->size() << " (Parallel Quicksort): ";
 		for(auto i = 0; i < myListCopy->size(); ++i){
 			std::cout << myListCopy->at(i) << " ";
 		}
